@@ -411,11 +411,6 @@
           </section>
 
           <section class="section">
-            <div class="section-h"><h2>Irish employment law · live compliance</h2><a onclick="toast('Full audit log coming Phase 2')">View audit log →</a></div>
-            <div class="card card-p" id="compliance-card"></div>
-          </section>
-
-          <section class="section">
             <div class="kpi-grid">
               <div class="card card-p tone-success">
                 <div class="kpi-icon"><svg class="icon-kpi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
@@ -626,6 +621,22 @@
           <div id="payroll-render"></div>
         </div>
 
+        <!-- ─── COMPLIANCE (live Irish-law audit) ─── -->
+        <div id="page-compliance" class="page">
+          <div class="header">
+            <div>
+              <h1 class="h-title">Compliance</h1>
+              <p class="h-sub">Live audit against Irish employment law · re-runs after every roster change</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-ghost" onclick="renderComplianceCard(); toast('Re-run complete')">↻ Re-run check</button>
+              <button class="btn-ghost" onclick="printCurrentPage('compliance', 'Compliance Report')">📄 Print / PDF</button>
+            </div>
+          </div>
+          <div id="compliance-card" style="margin-bottom:16px;"></div>
+          <div id="compliance-per-staff"></div>
+        </div>
+
         <div id="page-settings" class="page">
           <div class="header"><div><h1 class="h-title">Settings</h1><p class="h-sub">Demo data tools</p></div></div>
           <div class="card card-p" style="display:flex; flex-direction:column; gap:8px; align-items:flex-start;">
@@ -743,6 +754,7 @@
       audit:     '<path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>',
       payslip:   '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15h6"/>',
       payroll:   '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+      compliance:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
       settings:  '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
       home:      '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
       me:        '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
@@ -761,6 +773,7 @@
       { id:'staff',        label:'Staff',       icon:'staff',        color:'#D14B7F' },
       { id:'payslip',      label:'Payslip',     icon:'payslip',      color:'#3FB984' },
       { id:'payroll',      label:'Payroll',     icon:'payroll',      color:'#E69539' },
+      { id:'compliance',   label:'Compliance',  icon:'compliance',   color:'#14B8A6' },
       { id:'settings',     label:'Settings',    icon:'settings',     color:'#A07FB5' },
     ];
     const MNAV = [
@@ -837,6 +850,7 @@
       // Refresh dynamic pages on navigation so they reflect the latest data.
       if (pageId === 'payslip'     && typeof renderPayslip     === 'function') { try { renderPayslip();     } catch(e){ console.warn(e); } }
       if (pageId === 'payroll'     && typeof renderPayroll     === 'function') { try { renderPayroll();     } catch(e){ console.warn(e); } }
+      if (pageId === 'compliance'  && typeof renderComplianceCard === 'function') { try { renderComplianceCard(); } catch(e){ console.warn(e); } }
       if (pageId === 'availability'&& typeof renderAvailability=== 'function') { try { renderAvailability();} catch(e){ console.warn(e); } }
       if (pageId === 'swaps'       && typeof renderSwaps       === 'function') { try { renderSwaps();       } catch(e){ console.warn(e); } }
 
@@ -2025,17 +2039,22 @@
         ];
         const passing = rules.filter(r => r.ok).length;
         const total = rules.length;
+        const headlineColor = passing === total ? '#3FB984' : '#E69539';
 
-        let html = `<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-          <div style="font-size:14px; font-weight:800; color:var(--text-primary);">
-            ${passing === total
-              ? `<span style="color:#3FB984;">✓ ${passing}/${total} rules passing</span>`
-              : `<span style="color:#E69539;">⚠ ${passing}/${total} rules passing · ${total - passing} need attention</span>`}
+        let html = `<div class="card card-p" style="margin-bottom:14px; border-left:4px solid ${headlineColor};">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <div>
+              <div style="font-family:'Poppins',sans-serif; font-weight:900; font-size:22px; color:${headlineColor};">
+                ${passing === total ? `✓ ${passing}/${total} rules passing` : `⚠ ${passing}/${total} rules passing`}
+              </div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Working Time Act 1997 + Min Wage Act 2000 + Empl. Permits Acts · Last checked: ${new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>
+            </div>
+            <span style="padding:6px 12px; border-radius:8px; background:${tint(headlineColor,0.18)}; color:${headlineColor}; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px;">${total - passing === 0 ? 'All clear' : `${total - passing} need attention`}</span>
           </div>
-          <div style="font-size:11px; color:var(--text-muted);">Working Time Act 1997 + Min Wage Act 2000 + Empl. Permits Acts</div>
         </div>`;
 
-        html += `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:8px;">`;
+        html += `<div class="card card-p"><div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:800; margin-bottom:10px;">Statute checks</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:8px;">`;
         rules.forEach(r => {
           const color = r.ok ? '#3FB984' : '#E5524C';
           const symbol = r.ok ? '✓' : '⚠';
@@ -2050,25 +2069,75 @@
             </div>
           </div>`;
         });
-        html += `</div>`;
+        html += `</div></div>`;
 
         if (issues.length > 0) {
-          html += `<div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; font-weight:800; color:var(--danger); margin-bottom:8px;">Active issues</div>`;
+          html += `<div class="card card-p" style="margin-top:14px; border-left:4px solid var(--danger);">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; font-weight:800; color:var(--danger); margin-bottom:8px;">Active issues · ${issues.length}</div>`;
           issues.forEach(i => {
-            html += `<div style="display:flex; gap:10px; padding:6px 0; font-size:12px;">
-              <span style="color:var(--danger); font-weight:800; min-width:120px;">${i.staff}</span>
-              <span style="color:var(--text-secondary);">${i.detail}</span>
+            html += `<div style="display:flex; gap:10px; padding:8px 0; border-top:1px solid var(--border); font-size:13px;">
+              <span style="color:var(--danger); font-weight:800; min-width:140px;">${i.staff}</span>
+              <span style="color:var(--text-secondary); flex:1;">${i.detail}</span>
             </div>`;
           });
           html += `</div>`;
         }
         el.innerHTML = html;
+
+        // ── Per-staff compliance row table (only on the dedicated page) ────
+        const perStaffEl = document.getElementById('compliance-per-staff');
+        if (perStaffEl) {
+          let table = `<div class="card" style="overflow:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+              <thead><tr style="background:var(--bg-elevated);">
+                ${['Staff','Tier','Hrs/wk','Days','11h rest','Min wage','Stamp 2','RTW','Status']
+                  .map((h, i) => `<th style="text-align:${i < 2 ? 'left' : 'center'}; padding:10px 12px; font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">${h}</th>`).join('')}
+              </tr></thead>
+              <tbody>`;
+          ACTIVE_STAFF.forEach(s => {
+            const bg = s.mgr ? '#D14B7F' : colorFor(s.id);
+            const tpc = tierPillColor(s.tier);
+            const sd = rosterData[s.id] || {};
+            const totalH = Object.values(sd).reduce((sum, sh) => {
+              if (!sh) return sum;
+              const [sh1, sm] = sh.start.split(':').map(Number);
+              const [eh, em] = sh.end.split(':').map(Number);
+              return sum + ((eh*60+em) - (sh1*60+sm))/60;
+            }, 0);
+            const days = Object.values(sd).filter(sh => sh).length;
+            const mw = minWageCheck(s);
+            const staffIssues = issues.filter(i => i.staff === s.name);
+            const restOk = !staffIssues.find(i => i.kind === 'rest_breach');
+            const stamp2Ok = !staffIssues.find(i => i.kind === 'stamp2_cap');
+            const rtwOk = !staffIssues.find(i => i.kind === 'rtw_expired' || i.kind === 'rtw_soon');
+            const okMark = (ok) => ok ? '<span style="color:#3FB984;">✓</span>' : '<span style="color:#E5524C;">⚠</span>';
+            const status = staffIssues.length === 0
+              ? '<span class="pill" style="background:rgba(63,185,132,0.18); color:#3FB984;">✓ clear</span>'
+              : `<span class="pill" style="background:rgba(229,82,76,0.18); color:#E5524C;">⚠ ${staffIssues.length}</span>`;
+            table += `<tr style="cursor:pointer; border-top:1px solid var(--border);" onclick="openStaffDetail('${s.id}')">
+              <td style="padding:10px 12px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span class="avatar avatar-sm" style="background:${bg};">${s.init}</span>
+                  <div style="font-weight:700;">${s.name}</div>
+                </div>
+              </td>
+              <td style="padding:10px 12px;"><span class="pill" style="background:${tpc.bg}; color:${tpc.fg};">${s.tier}</span></td>
+              <td style="padding:10px 12px; text-align:center; font-family:ui-monospace,monospace;">${totalH.toFixed(1)}h ${totalH > IE_MAX_WEEKLY_HOURS ? okMark(false) : okMark(true)}</td>
+              <td style="padding:10px 12px; text-align:center; font-family:ui-monospace,monospace;">${days}/${MAX_WORKING_DAYS_PER_WEEK} ${days > MAX_WORKING_DAYS_PER_WEEK ? okMark(false) : okMark(true)}</td>
+              <td style="padding:10px 12px; text-align:center;">${okMark(restOk)}</td>
+              <td style="padding:10px 12px; text-align:center;">${okMark(mw.ok)} <span style="font-size:10px; color:var(--text-muted); margin-left:4px;">${mw.band.split(' ')[0]}</span></td>
+              <td style="padding:10px 12px; text-align:center;">${s.rtw_type === 'Stamp 2' ? okMark(stamp2Ok) : '<span style="color:var(--text-muted);">—</span>'}</td>
+              <td style="padding:10px 12px; text-align:center;">${okMark(rtwOk)}</td>
+              <td style="padding:10px 12px; text-align:center;">${status}</td>
+            </tr>`;
+          });
+          table += `</tbody></table></div>`;
+          perStaffEl.innerHTML = `<div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:800; margin-bottom:8px;">Per-staff status · click any row for full detail</div>` + table;
+        }
       } catch (err) {
         console.error('renderComplianceCard failed:', err);
       }
     }
-    renderComplianceCard();
     window.renderComplianceCard = renderComplianceCard;
 
     /* ─── AVAILABILITY ──────────────────────────────────────────────────────

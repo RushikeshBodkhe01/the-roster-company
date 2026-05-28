@@ -885,41 +885,63 @@
         </div>
       `).join('');
     }
+    // Global cache so Dashboard, Roster header, AND auto-generator all read the same forecast.
+    let weatherCache = null;
+    let weatherPromise = null;
+    async function fetchWeather() {
+      if (weatherCache) return weatherCache;
+      if (weatherPromise) return weatherPromise;
+      weatherPromise = (async () => {
+        try {
+          const url = 'https://api.open-meteo.com/v1/forecast?latitude=53.3865&longitude=-6.0698&daily=weather_code,temperature_2m_max,precipitation_sum&timezone=Europe/Dublin&forecast_days=7';
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          weatherCache = (data.daily.time || []).map((iso, i) => ({
+            iso,
+            date: new Date(iso + 'T00:00:00'),
+            code: data.daily.weather_code[i],
+            tempMax: Math.round(data.daily.temperature_2m_max[i] ?? 0),
+            precip: data.daily.precipitation_sum[i] ?? 0,
+            emoji: weatherCodeToEmoji(data.daily.weather_code[i]),
+          }));
+          return weatherCache;
+        } catch (e) {
+          weatherCache = []; // negative cache so we don't hammer the API on retries
+          return weatherCache;
+        }
+      })();
+      return weatherPromise;
+    }
     async function loadForecast() {
       const el = document.getElementById('forecast');
       if (!el) return;
       renderForecastSkeleton();
-      try {
-        const url = 'https://api.open-meteo.com/v1/forecast?latitude=53.3865&longitude=-6.0698&daily=weather_code,temperature_2m_max,precipitation_sum&timezone=Europe/Dublin&forecast_days=7';
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        const dates = data.daily.time;
-        const codes = data.daily.weather_code;
-        const temps = data.daily.temperature_2m_max;
-        const rains = data.daily.precipitation_sum;
-        el.innerHTML = dates.map((iso, i) => {
-          const date = new Date(iso + 'T00:00:00');
-          const label = days[date.getDay()];
-          const tempMax = Math.round(temps[i] ?? 0);
-          const precip = rains[i] ?? 0;
-          const emoji = weatherCodeToEmoji(codes[i]);
-          const n = suggestStaff(date, tempMax, precip);
-          const tone = n >= 6 ? { bg:'rgba(229,82,76,0.14)',  fg:'#E5524C' }
-                     : n >= 4 ? { bg:'rgba(230,149,57,0.14)', fg:'#E69539' }
-                              : { bg:'rgba(91,169,176,0.14)', fg:'#5BA9B0' };
-          const reason = `${tempMax}° · ${precip.toFixed(1)}mm rain`;
-          return `<div class="forecast-day" title="${reason}">
-            <div class="fd-label">${label}</div><div class="fd-emoji">${emoji}</div><div class="fd-temp">${tempMax}°</div>
-            <div class="fd-suggest" style="background:${tone.bg};color:${tone.fg};"><div class="fd-n">${n}</div><div class="fd-l">staff</div></div>
-          </div>`;
-        }).join('');
-      } catch (e) {
+      const cache = await fetchWeather();
+      if (!cache || !cache.length) {
         el.innerHTML = '<div style="padding:16px; color:var(--text-muted); font-size:13px;">Weather unavailable — check connection</div>';
+        return;
       }
+      const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      el.innerHTML = cache.map(w => {
+        const label = dayNames[w.date.getDay()];
+        const n = suggestStaff(w.date, w.tempMax, w.precip);
+        const tone = n >= 6 ? { bg:'rgba(229,82,76,0.14)',  fg:'#E5524C' }
+                   : n >= 4 ? { bg:'rgba(230,149,57,0.14)', fg:'#E69539' }
+                            : { bg:'rgba(91,169,176,0.14)', fg:'#5BA9B0' };
+        const reason = `${w.tempMax}° · ${w.precip.toFixed(1)}mm rain`;
+        return `<div class="forecast-day" title="${reason}">
+          <div class="fd-label">${label}</div><div class="fd-emoji">${w.emoji}</div><div class="fd-temp">${w.tempMax}°</div>
+          <div class="fd-suggest" style="background:${tone.bg};color:${tone.fg};"><div class="fd-n">${n}</div><div class="fd-l">staff</div></div>
+        </div>`;
+      }).join('');
     }
     loadForecast();
+    // Once the forecast loads, repaint the Roster grid so its day-header weather chips light up.
+    fetchWeather().then(() => {
+      const wrap = document.getElementById('roster-grid-wrap');
+      if (wrap) paintRosterGrid(wrap);
+    });
 
     /* ─── STAFF DATA + WHO'S IN ─── */
     const PALETTE = ['#3F7BAF','#A06A4B','#7C5E9B','#467D63','#9B5774','#5A7892','#A66A33','#5E8A57','#88557E','#4F8A8C','#A85549','#6A6F8F'];
@@ -1121,16 +1143,27 @@
     }
 
     // Shared grid renderer used by initial load AND the auto-generate rerender.
-    // Single source of truth for stripes, weekend tints, and the legend below.
+    // Single source of truth for stripes, weekend tints, weather chips, and the legend below.
     function paintRosterGrid(el) {
       if (!el) return;
+      // Pull cached weather (already loaded by Dashboard); positional Mon..Sun.
+      // weatherForDay() returns the matching entry or null if forecast hasn't loaded yet.
+      function weatherForDay(dayIdx) {
+        if (!weatherCache || !weatherCache.length) return null;
+        const targetDow = (dayIdx + 1) % 7; // Mon=1..Sun=0 in JS getDay()
+        return weatherCache.find(w => w.date.getDay() === targetDow) || null;
+      }
       let html = `<div class="rgrid" style="min-width:680px;">`;
       html += `<div class="head" style="text-align:left; padding-left:12px;">Staff</div>`;
       ROSTER_DAYS.forEach((d, idx) => {
         const isWeekend = idx >= 5;
         const headBg = isWeekend ? 'rgba(209,75,127,0.15)' : '';
         const headFg = isWeekend ? '#D14B7F' : '';
-        html += `<div class="head" style="${headBg ? `background:${headBg};` : ''}${headFg ? `color:${headFg};` : ''}">${d}</div>`;
+        const w = weatherForDay(idx);
+        const weatherChip = w
+          ? `<div style="font-size:11px; font-weight:400; margin-top:2px; opacity:0.85;" title="${w.tempMax}° · ${w.precip.toFixed(1)}mm rain">${w.emoji} ${w.tempMax}°</div>`
+          : '';
+        html += `<div class="head" style="${headBg ? `background:${headBg};` : ''}${headFg ? `color:${headFg};` : ''}">${d}${weatherChip}</div>`;
       });
       ROSTER_STAFF.forEach((s, rowIdx) => {
         const bg = s.mgr ? '#D14B7F' : colorFor(s.id);
@@ -1208,12 +1241,46 @@
       return 3;
     }
 
+    // Per CLAUDE.md demand multipliers + the case study: warm + dry boosts afternoon
+    // headcount, heavy rain trims it, storm trims across the board.
+    function weatherAdjustedNeeds(baseNeeds, dayIdx) {
+      const adj = JSON.parse(JSON.stringify(baseNeeds[dayIdx])); // deep copy
+      if (!weatherCache || !weatherCache.length) return adj;
+      const targetDow = (dayIdx + 1) % 7;
+      const w = weatherCache.find(x => x.date.getDay() === targetDow);
+      if (!w) return adj;
+      // Storm (95-99): all afternoon slots dip by 1, floor 2
+      if (w.code >= 95) {
+        adj.afternoon = Math.max(2, (adj.afternoon || 0) - 1);
+      }
+      // Heavy rain (>5mm): customers stay home, trim afternoon
+      else if (w.precip > 5) {
+        adj.afternoon = Math.max(2, (adj.afternoon || 0) - 1);
+      }
+      // Warm and dry (≥18° and <1mm): tourist surge, boost afternoon by 1
+      else if (w.tempMax >= 18 && w.precip < 1) {
+        adj.afternoon = (adj.afternoon || 0) + 1;
+      }
+      // Cold (<10°): slightly trim morning
+      if (w.tempMax < 10) {
+        adj.morning = Math.max(2, (adj.morning || 0) - 1);
+      }
+      return adj;
+    }
+
     function autoGenerateRoster(btn) {
       const originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = '⏳ Generating…';
-      setTimeout(() => {
+      setTimeout(async () => {
         const DAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+        // Make sure forecast is loaded so the auto-gen can react to weather.
+        // If it fails, fall back silently to base needs.
+        try { await fetchWeather(); } catch (e) { /* no-op */ }
+
+        // Build weather-adjusted DAY_NEEDS for this run.
+        const ADJUSTED_NEEDS = DAY_NEEDS.map((_, d) => weatherAdjustedNeeds(DAY_NEEDS, d));
 
         // ─── Reset + state ─────────────────────────────────────────────────
         const state = {};
@@ -1285,7 +1352,7 @@
         // ─── STEP 2: Market specialists Sat + Sun ──────────────────────────
         // Prefer Rafael (HDB specialist), then Jonny, then Jonas as backup.
         [5, 6].forEach(dayIdx => {
-          if (!DAY_NEEDS[dayIdx].market) return;
+          if (!ADJUSTED_NEEDS[dayIdx].market) return;
           const preferred = ['s7', 's12', 's2'];
           for (const id of preferred) {
             const s = ROSTER_STAFF.find(x => x.id === id);
@@ -1297,7 +1364,7 @@
         // Order: morning → fullday → afternoon (market already handled above).
         function fillSlots(relaxTarget) {
           for (let d = 0; d < 7; d++) {
-            const need = DAY_NEEDS[d];
+            const need = ADJUSTED_NEEDS[d];
             ['morning', 'fullday', 'afternoon'].forEach(slot => {
               const want = need[slot] || 0;
               // Count what's already placed in this slot today

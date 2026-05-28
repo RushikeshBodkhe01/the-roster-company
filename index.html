@@ -954,19 +954,19 @@
       // Helena: mornings only — real rotas show all her shifts end by 14:00. Confirmed deli_manager + Fri anchor.
       staffRow({ id:'s4',  name:'Helena Kelly',      init:'HK',                 pos:'Senior Staff',      tier:'T3',                                            can_open:true,  can_close:false, can_deli:true,                  anchor_day:'Fri', special_role:'deli_manager'           }),
       staffRow({ id:'s5',  name:'Ruthy Vitoriano',   init:'RV',                 pos:'Staff',             tier:'T2',                                            can_open:true,  can_close:true,  can_deli:true,                                    rtw_type:'Stamp 2',   rtw_expiry:'2026-05-28' }),
-      staffRow({ id:'s6',  name:'Gavin Byrne',       init:'GB',                 pos:'Staff (Eves)',      tier:'T2',                                                            can_close:true,                                  max_shifts_per_week:4, fixed_days:['Thu','Fri','Sat','Sun'] }),
+      staffRow({ id:'s6',  name:'Gavin Byrne',       init:'GB',                 pos:'Staff (Eves)',      tier:'T2',                                                            can_close:true,                                  max_shifts_per_week:5, fixed_days:['Thu','Fri','Sat','Sun'] }),
       staffRow({ id:'s7',  name:'Rafael Azinheira',  init:'RA',                 pos:'Market/Staff',      tier:'T2',                                                            can_close:true,                  can_market:true                                                        }),
       // T1 staff — can_open: true per Part 3A correction (rotas show juniors do morning shifts).
       // Auto-generator still places T1 in afternoons by default via the tier-sorted ordering.
-      staffRow({ id:'s8',  name:'Rushikesh Bodhke',  init:'RB',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:4, paired_only:true, rtw_type:'Stamp 1G', rtw_expiry:'2028-05-15' }),
-      staffRow({ id:'s9',  name:'Mark Lally',        init:'ML',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:4, paired_only:true                              }),
+      staffRow({ id:'s8',  name:'Rushikesh Bodhke',  init:'RB',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true, rtw_type:'Stamp 1G', rtw_expiry:'2028-05-15' }),
+      staffRow({ id:'s9',  name:'Mark Lally',        init:'ML',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true                              }),
       // ─── Added per real Bizimply rotas observed on the noticeboard ─────────
       staffRow({ id:'s10', name:'Thomas Doyle',      init:'TD',                 pos:'Staff',             tier:'T2',                                                            can_close:true                                                                                          }),
-      staffRow({ id:'s11', name:'Sean Martin',       init:'SM',                 pos:'Staff (New Starter)', tier:'T1',                                          can_open:true,  can_close:true,                                  max_shifts_per_week:4, paired_only:true                              }),
+      staffRow({ id:'s11', name:'Sean Martin',       init:'SM',                 pos:'Staff (New Starter)', tier:'T1',                                          can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true                              }),
       staffRow({ id:'s12', name:'Jonny Jones',       init:'JJ',                 pos:'Hot Dog Box / Staff', tier:'T2',                                                          can_close:true,                  can_market:true                                                        }),
       // ─── Deactivated (preserved for historical references; filtered from active lists) ─
       staffRow({ id:'s13', name:'Lavinia Santos',    init:'LS',                 pos:'Part-Time',         tier:'T2',                                                                              can_deli:true,                                                                       is_active:false }),
-      staffRow({ id:'s14', name:'Alex Hargrove',     init:'AH',                 pos:'Staff',             tier:'T1',                                                            can_close:true,                                  max_shifts_per_week:4, paired_only:true,                                          is_active:false }),
+      staffRow({ id:'s14', name:'Alex Hargrove',     init:'AH',                 pos:'Staff',             tier:'T1',                                                            can_close:true,                                  max_shifts_per_week:5, paired_only:true,                                          is_active:false }),
     ];
     const STATUS = { 's1':'in','s2':'soon','s3':'off','s4':'in','s5':'off','s6':'soon','s7':'off','s8':'off','s9':'off','s10':'off','s11':'off','s12':'soon' };
 
@@ -1071,6 +1071,8 @@
     // Irish Organisation of Working Time Act — standard cap is 40h/week.
     // Auto-generator enforces this regardless of an individual's weekly_hours_ceiling.
     const IE_MAX_WEEKLY_HOURS = 40;
+    // Shop policy: nobody works more than 5 days in any week. Hard cap, no exceptions.
+    const MAX_WORKING_DAYS_PER_WEEK = 5;
 
     // Experience tiers derived from start_date — shown alongside T1/T2/T3 so Jack
     // can see at a glance who's a veteran vs. a new starter.
@@ -1191,7 +1193,8 @@
         ROSTER_STAFF.forEach(s => {
           stateBy[s.id] = {
             target: s.weekly_hours_ceiling || 36,
-            maxShifts: s.max_shifts_per_week || 5,
+            // Hard cap: nobody ever exceeds MAX_WORKING_DAYS_PER_WEEK, even if their personal field is higher.
+            maxShifts: Math.min(s.max_shifts_per_week || 5, MAX_WORKING_DAYS_PER_WEEK),
             scheduled: 0,
             shiftCount: 0,
           };
@@ -1904,7 +1907,7 @@
           ${(() => { const xp = experienceFor(s); return detailRow('🎓', 'Experience', `<span style="color:${xp.color}; font-weight:800;">${xp.icon} ${xp.label}</span>`); })()}
           ${detailRow('📋', 'Tier',           s.tier + (s.tier === 'T3' ? ' — Anchor (senior)' : s.tier === 'T2' ? ' — Flex (mid)' : ' — Developing (junior)'))}
           ${detailRow('💰', 'Hourly rate',    `€${Number(s.hourly_rate).toFixed(2)} <span style="color:var(--text-muted); font-weight:400; margin-left:6px;">· Sunday +33%</span>`)}
-          ${detailRow('⏱️', 'Weekly target',  `${s.weekly_hours_ceiling}h ceiling · max ${s.max_shifts_per_week} shifts <span style="color:var(--text-muted); font-weight:400; margin-left:6px;">· capped at ${IE_MAX_WEEKLY_HOURS}h (IE law)</span>`)}
+          ${detailRow('⏱️', 'Weekly target',  `${s.weekly_hours_ceiling}h ceiling · max ${Math.min(s.max_shifts_per_week, MAX_WORKING_DAYS_PER_WEEK)} shifts <span style="color:var(--text-muted); font-weight:400; margin-left:6px;">· capped at ${IE_MAX_WEEKLY_HOURS}h / ${MAX_WORKING_DAYS_PER_WEEK} days</span>`)}
           ${detailRow('🏦', 'Bank',           s.bank_name ? `${s.bank_name} · <span style="font-family:ui-monospace,monospace;">●●●●●● ${s.bank_last4}</span>` : null)}
 
           ${sectionHeading('Emergency contact')}

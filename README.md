@@ -1,24 +1,53 @@
-# The Gem — Roster Demo
+# The Gem Roster
 
-Static demo of a custom rostering app built for **The Gem**, a convenience + ice cream shop in Howth Harbour, Co. Dublin.
+Rostering, payroll and compliance for an 11-person ice cream shop in Howth.
 
-Live: see GitHub Pages link in the repo's About section.
+Live demo: https://rushikeshbodkhe01.github.io/the-gem-roster/
 
-## What's inside (single-page HTML, no backend)
+## Background
 
-- **Dashboard** — live Howth weather forecast (Open-Meteo), KPIs, today's shifts
-- **Roster** — 12-staff weekly grid with 3-zone colour palette, click-to-edit shifts with custom time inputs, ✨ Auto-generate using real shop rules (Helena mornings only, Gavin Thu–Sun lock, Rushikesh/Mark paired-only, anchor days for Joan/Helena)
-- **Availability** — tap-to-cycle 4-state grid, saved to localStorage
-- **Swaps** — open marketplace + direct peer swaps, claim → manager approval flow
-- **Leave** — pending requests with approve/reject
-- **Staff** — 12 active staff with capability chips and full detail modal (phone, address, emergency contact, RTW, bank, tenure)
-- **Payslip** — real Irish PRSI + USC math, day-by-day breakdown, CSV export
-- **Print / PDF** — landscape A4 export of the roster and payslip
+I work weekends at The Gem in Howth. The owner rosters 11 staff every Sunday using paper and WhatsApp. I built this to replace that.
 
-## Tech
+It also handles three things Bizimply and similar tools don't do well for a small Irish retail business:
 
-Single self-contained `index.html`. No build step, no dependencies, no backend. Persists demo state in `localStorage`. Loads Google Fonts + Open-Meteo at runtime.
+- Right-to-work expiry tracking (Stamp 2, Working Holiday, Stamp 1G)
+- Demand forecast that actually uses weather (Howth lives and dies by sunshine)
+- Payroll output that drops straight into BrightPay with correct PRSI and USC bands
 
-## Built by
+## What's in it
 
-Rushikesh Bodkhe — MSc Business Analytics, Dublin City University. Floor staff at The Gem.
+Auto-generated weekly roster, weighted by the 7-day Open-Meteo forecast and the Howth event calendar. Click any cell to edit a shift.
+
+Right-to-work tracker per staff member with a 30-day expiry warning. This is the feature I'm proudest of because nobody in the team had to remember anything.
+
+Compliance checker that runs against the Organisation of Working Time Act 1997 after every change. Flags breaches of the 48-hour week, 11-hour daily rest, and Sunday premium rules.
+
+Payslip generator with PAYE, PRSI Class A1, USC bands, and the 23% employer uplift. Exports a BrightPay-ready CSV.
+
+Shift swap marketplace, availability heatmap, audit log, leave approvals.
+
+## Stack
+
+Next.js (App Router), React, Tailwind, Supabase for Postgres and auth, Claude API for shift suggestion logic and supplier email drafts, Open-Meteo for the forecast, Resend for sending payslips. Hosted on Vercel, demo on GitHub Pages.
+
+## What it saves
+
+Rough numbers from time-and-motion on my own shifts:
+
+- Rostering: ~2 hours down to ~15 minutes a week
+- Payroll prep: ~90 minutes down to ~10
+- Right-to-work compliance: tracked properly instead of in someone's head
+
+At roughly €18/hr manager rate that's around €2,500–€2,800 a year, plus avoiding one WRC fine which would dwarf that.
+
+I haven't pitched this to the owner yet. That's the next conversation.
+
+## What's next
+
+SMS shift notifications, multi-store support if a second site opens, and eventually pushing PRSI returns straight to Revenue's ROS API. The plan is to keep building it for The Gem first, then offer it to one or two other Dublin SMEs.
+
+## Why this exists
+
+I'm an MSc Business Analytics grad from DCU job-hunting for Business Analyst and Data Analyst roles in Dublin. The fastest way I've found to learn what stakeholders actually need is to be the stakeholder.
+
+Stamp 1G, work-authorised in Ireland until 2028.

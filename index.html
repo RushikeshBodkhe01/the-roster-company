@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0F1014" />
-  <title>The Gem Roster — Preview</title>
+  <title>The Roster Company — Preview</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
@@ -357,10 +357,10 @@
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="sidebar-header">
         <div class="logo-row">
-          <div class="logo-icon" aria-hidden="true">🍦</div>
+          <div class="logo-icon" aria-hidden="true">📋</div>
           <div>
-            <div class="logo-title">The Gem</div>
-            <div class="logo-sub">ROSTER · HOWTH</div>
+            <div class="logo-title">The Roster Co.</div>
+            <div class="logo-sub">ROSTER · DEMO</div>
           </div>
         </div>
       </div>
@@ -369,7 +369,7 @@
         <div class="user-row">
           <span class="avatar avatar-md" style="background:var(--gem-pink);">AT</span>
           <div style="flex:1; min-width:0;">
-            <div class="user-name">Adrienne</div>
+            <div class="user-name">Staff A</div>
             <div class="user-role">manager</div>
           </div>
         </div>
@@ -386,7 +386,7 @@
 
           <div class="header">
             <div>
-              <h1 class="h-greeting" id="greeting">Good evening, Adrienne</h1>
+              <h1 class="h-greeting" id="greeting">Good evening, A</h1>
               <p class="h-date" id="date-line">Tuesday, 19 May</p>
             </div>
             <div class="hero-actions">
@@ -482,7 +482,7 @@
               <div class="rtw-row urgent">
                 <span class="avatar avatar-md" style="background:#3F7BAF;">RV</span>
                 <div class="rtw-text">
-                  <div class="rtw-name">Ruthy Vitoriano</div>
+                  <div class="rtw-name">Staff E</div>
                   <div class="rtw-meta">Stamp 2 (Student) · expires 2026-05-28</div>
                 </div>
                 <span class="rtw-badge urgent">9 days</span>
@@ -490,7 +490,7 @@
               <div class="rtw-row warning">
                 <span class="avatar avatar-md" style="background:#9B5774;">LS</span>
                 <div class="rtw-text">
-                  <div class="rtw-name">Lavinia Santos</div>
+                  <div class="rtw-name">Staff M</div>
                   <div class="rtw-meta">Working Holiday Authorisation · expires 2026-06-10</div>
                 </div>
                 <span class="rtw-badge warning">22 days</span>
@@ -601,7 +601,7 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="btn-ghost" onclick="printPayroll()">📄 Print / PDF</button>
               <button class="btn-ghost" onclick="downloadPayrollCsv()">📤 Export CSV</button>
-              <button class="btn-primary" onclick="toast('Sage / BrightPay file coming Phase 2')">🧾 Export to BrightPay</button>
+              <button class="btn-primary" onclick="openBrightPayModal()">🧾 Export to BrightPay</button>
             </div>
           </div>
           <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
@@ -735,6 +735,28 @@
       <div class="modal-footer">
         <button type="button" class="btn-ghost" id="staff-detail-cancel">Close</button>
         <button type="button" class="btn-primary" onclick="toast('Edit form coming Phase 2')">✏️ Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BRIGHTPAY EXPORT PREVIEW MODAL ─── -->
+  <div id="brightpay-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="brightpay-title">
+    <div class="modal" role="document" style="max-width:760px;">
+      <button type="button" class="modal-close" id="brightpay-close" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="brightpay-title">Export to BrightPay</h2>
+      <div style="font-size:13px; color:var(--text-secondary); margin:0 0 12px;">
+        Pay Period Hours import (BrightPay 2026 compatible). PAYE, PRSI Class A1 and USC are calculated by BrightPay using live Revenue tax tables — this file supplies the inputs.
+      </div>
+      <div id="brightpay-summary" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;"></div>
+      <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:8px; max-height:320px; overflow:auto;">
+        <pre id="brightpay-preview" style="margin:0; padding:14px; font-family:ui-monospace,monospace; font-variant-numeric:tabular-nums; font-size:11px; line-height:1.55; color:var(--text-primary); white-space:pre;"></pre>
+      </div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:8px; line-height:1.5;">
+        Saves as <span style="font-family:ui-monospace,monospace; color:var(--text-secondary);">brightpay_payrun_YYYY-MM-DD.csv</span>. Import path in BrightPay: <span style="color:var(--text-secondary);">File → Import → Pay Period Hours from CSV</span>.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" id="brightpay-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="brightpay-download">⬇ Download CSV</button>
       </div>
     </div>
   </div>
@@ -897,7 +919,7 @@
       const now = new Date();
       const h = now.getHours();
       const greeting = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
-      document.getElementById('greeting').textContent = `Good ${greeting}, Adrienne`;
+      document.getElementById('greeting').textContent = `Good ${greeting}, A`;
       document.getElementById('date-line').textContent =
         new Intl.DateTimeFormat('en-IE', { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
     })();
@@ -1001,10 +1023,10 @@
       let h = 5381; for (let i = 0; i < seed.length; i++) { h = ((h << 5) + h) + seed.charCodeAt(i); h |= 0; }
       return PALETTE[Math.abs(h) % PALETTE.length];
     }
-    // Real Gem staff — mirrors the seed in supabase/migrations/010.
+    // Anonymised staff for trial demo. Each row is "Staff A" through "Staff N".
     // mgr is kept as a derived convenience flag (s.role === 'manager').
-    // Inactive staff (Lavinia, Alex) are preserved in the array so historical
-    // data renders; they're filtered out of active-staff lists.
+    // Inactive staff (M, N) are preserved in the array so historical data
+    // renders; they're filtered out of active-staff lists.
     function staffRow(o) {
       return Object.assign({
         role: 'staff', tier: 'T1', contract_type: 'flexible',
@@ -1022,45 +1044,45 @@
       }, o, { mgr: (o.role === 'manager') });
     }
     const STAFF = [
-      staffRow({ id:'s1',  name:'Adrienne Thornton', init:'AT', role:'manager', pos:'Manager',           tier:'T3', weekly_hours_ceiling:39, hourly_rate:16.50, can_open:true,  can_close:true,  can_deli:true                                                                       }),
-      staffRow({ id:'s2',  name:'Jonas Vargas',      init:'JV', role:'manager', pos:'Manager',           tier:'T3', weekly_hours_ceiling:39, hourly_rate:16.50, can_open:true,  can_close:true,  can_deli:true,  can_market:true                                                       }),
-      staffRow({ id:'s3',  name:'Joan Bennett',      init:'JB',                 pos:'Senior Staff',      tier:'T3',                                            can_open:true,  can_close:true,  can_deli:true,                  anchor_day:'Wed'                                       }),
-      // Helena: mornings only — real rotas show all her shifts end by 14:00. Confirmed deli_manager + Fri anchor.
-      staffRow({ id:'s4',  name:'Helena Kelly',      init:'HK',                 pos:'Senior Staff',      tier:'T3',                                            can_open:true,  can_close:false, can_deli:true,                  anchor_day:'Fri', special_role:'deli_manager'           }),
-      staffRow({ id:'s5',  name:'Ruthy Vitoriano',   init:'RV',                 pos:'Staff',             tier:'T2',                                            can_open:true,  can_close:true,  can_deli:true,                                    rtw_type:'Stamp 2',   rtw_expiry:'2026-05-28' }),
-      staffRow({ id:'s6',  name:'Gavin Byrne',       init:'GB',                 pos:'Staff (Eves)',      tier:'T2',                                                            can_close:true,                                  max_shifts_per_week:5, fixed_days:['Thu','Fri','Sat','Sun'] }),
-      staffRow({ id:'s7',  name:'Rafael Azinheira',  init:'RA',                 pos:'Market/Staff',      tier:'T2',                                                            can_close:true,                  can_market:true                                                        }),
-      // T1 staff — can_open: true per Part 3A correction (rotas show juniors do morning shifts).
-      // Auto-generator still places T1 in afternoons by default via the tier-sorted ordering.
-      staffRow({ id:'s8',  name:'Rushikesh Bodhke',  init:'RB',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true, rtw_type:'Stamp 1G', rtw_expiry:'2028-05-15' }),
-      staffRow({ id:'s9',  name:'Mark Lally',        init:'ML',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true                              }),
-      // ─── Added per real Bizimply rotas observed on the noticeboard ─────────
-      staffRow({ id:'s10', name:'Thomas Doyle',      init:'TD',                 pos:'Staff',             tier:'T2',                                                            can_close:true                                                                                          }),
-      staffRow({ id:'s11', name:'Sean Martin',       init:'SM',                 pos:'Staff (New Starter)', tier:'T1',                                          can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true                              }),
-      staffRow({ id:'s12', name:'Jonny Jones',       init:'JJ',                 pos:'Hot Dog Box / Staff', tier:'T2',                                                          can_close:true,                  can_market:true                                                        }),
+      staffRow({ id:'s1',  name:'Staff A', init:'A', role:'manager', pos:'Manager',           tier:'T3', weekly_hours_ceiling:39, hourly_rate:16.50, can_open:true,  can_close:true,  can_deli:true                                                                       }),
+      staffRow({ id:'s2',  name:'Staff B', init:'B', role:'manager', pos:'Manager',           tier:'T3', weekly_hours_ceiling:39, hourly_rate:16.50, can_open:true,  can_close:true,  can_deli:true,  can_market:true                                                       }),
+      staffRow({ id:'s3',  name:'Staff C', init:'C',                 pos:'Senior Staff',      tier:'T3',                                            can_open:true,  can_close:true,  can_deli:true,                  anchor_day:'Wed'                                       }),
+      // Staff D: mornings only — real rotas show all shifts end by 14:00. Confirmed deli_manager + Fri anchor.
+      staffRow({ id:'s4',  name:'Staff D', init:'D',                 pos:'Senior Staff',      tier:'T3',                                            can_open:true,  can_close:false, can_deli:true,                  anchor_day:'Fri', special_role:'deli_manager'           }),
+      staffRow({ id:'s5',  name:'Staff E', init:'E',                 pos:'Staff',             tier:'T2',                                            can_open:true,  can_close:true,  can_deli:true,                                    rtw_type:'Stamp 2',   rtw_expiry:'2026-05-28' }),
+      staffRow({ id:'s6',  name:'Staff F', init:'F',                 pos:'Staff (Eves)',      tier:'T2',                                                            can_close:true,                                  max_shifts_per_week:5, fixed_days:['Thu','Fri','Sat','Sun'] }),
+      staffRow({ id:'s7',  name:'Staff G', init:'G',                 pos:'Market/Staff',      tier:'T2',                                                            can_close:true,                  can_market:true                                                        }),
+      // T1 staff — can_open: true per real rotas (juniors do morning shifts).
+      // Auto-generator still places T1 in afternoons by default via tier-sorted ordering.
+      staffRow({ id:'s8',  name:'Staff H', init:'H',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true, rtw_type:'Stamp 1G', rtw_expiry:'2028-05-15' }),
+      staffRow({ id:'s9',  name:'Staff I', init:'I',                 pos:'Staff',             tier:'T1',                                            can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true                              }),
+      // ─── Added per observed rota noticeboard ──────────────────────────────
+      staffRow({ id:'s10', name:'Staff J', init:'J',                 pos:'Staff',             tier:'T2',                                                            can_close:true                                                                                          }),
+      staffRow({ id:'s11', name:'Staff K', init:'K',                 pos:'Staff (New Starter)', tier:'T1',                                          can_open:true,  can_close:true,                                  max_shifts_per_week:5, paired_only:true                              }),
+      staffRow({ id:'s12', name:'Staff L', init:'L',                 pos:'Market Specialist',   tier:'T2',                                                          can_close:true,                  can_market:true                                                        }),
       // ─── Deactivated (preserved for historical references; filtered from active lists) ─
-      staffRow({ id:'s13', name:'Lavinia Santos',    init:'LS',                 pos:'Part-Time',         tier:'T2',                                                                              can_deli:true,                                                                       is_active:false }),
-      staffRow({ id:'s14', name:'Alex Hargrove',     init:'AH',                 pos:'Staff',             tier:'T1',                                                            can_close:true,                                  max_shifts_per_week:5, paired_only:true,                                          is_active:false }),
+      staffRow({ id:'s13', name:'Staff M', init:'M',                 pos:'Part-Time',         tier:'T2',                                                                              can_deli:true,                                                                       is_active:false }),
+      staffRow({ id:'s14', name:'Staff N', init:'N',                 pos:'Staff',             tier:'T1',                                                            can_close:true,                                  max_shifts_per_week:5, paired_only:true,                                          is_active:false }),
     ];
     const STATUS = { 's1':'in','s2':'soon','s3':'off','s4':'in','s5':'off','s6':'soon','s7':'off','s8':'off','s9':'off','s10':'off','s11':'off','s12':'soon' };
 
-    // Per-staff personal + employment details. Realistic but fake — no real PPSN
-    // or bank numbers. Used by the Staff Detail modal (read-only in this demo).
+    // Per-staff personal + employment details (anonymised). Realistic but fake —
+    // no real PPSN or bank numbers. Used by the Staff Detail modal.
     const STAFF_DETAILS = {
-      s1:  { phone:'+353 87 555 0101', address:'42 Harbour Road, Howth',     eircode:'D13 X234', dob:'1989-03-12', emergency_name:'Sam Thornton',    emergency_phone:'+353 87 555 0102', emergency_relation:'Partner',   start_date:'2021-08-04', ppsn_last4:'1234A', bank_name:'AIB',     bank_last4:'4521', notes:'Store manager since 2024 promotion. Key holder. Trained deli + cash float.' },
-      s2:  { phone:'+353 87 555 0103', address:'8 Strand Road, Sutton',      eircode:'D13 Y991', dob:'1991-07-22', emergency_name:'Sofia Vargas',    emergency_phone:'+353 87 555 0104', emergency_relation:'Wife',      start_date:'2022-02-14', ppsn_last4:'5821B', bank_name:'Revolut', bank_last4:'7710', notes:'Manager · Hot Dog Box lead alongside Rafael. Speaks PT/EN/ES.' },
-      s3:  { phone:'+353 86 555 0105', address:'17 Thormanby Road, Howth',   eircode:'D13 N881', dob:'1986-11-04', emergency_name:'Paul Bennett',    emergency_phone:'+353 86 555 0106', emergency_relation:'Husband',   start_date:'2020-05-18', ppsn_last4:'3344A', bank_name:'BOI',     bank_last4:'9012', notes:'Senior. Wed anchor. Reliable for opens — has shop keys.' },
-      s4:  { phone:'+353 87 555 0107', address:'5 Sutton Park, Sutton',      eircode:'D13 W004', dob:'1990-01-29', emergency_name:'Mike Kelly',      emergency_phone:'+353 87 555 0108', emergency_relation:'Brother',   start_date:'2021-03-09', ppsn_last4:'7766C', bank_name:'AIB',     bank_last4:'3340', notes:'Deli manager. Mornings only — no closes. Fri anchor.' },
-      s5:  { phone:'+353 85 555 0109', address:'Apt 14, West Pier, Howth',   eircode:'D13 V552', dob:'2001-06-15', emergency_name:'Lara Vitoriano',  emergency_phone:'+353 85 555 0110', emergency_relation:'Sister',    start_date:'2024-09-02', ppsn_last4:'8821B', bank_name:'Revolut', bank_last4:'2156', notes:'Stamp 2 student visa — 20h cap during term. Renews 2026-05-28 (urgent).' },
-      s6:  { phone:'+353 87 555 0111', address:'92 Howth Road, Sutton',      eircode:'D13 K820', dob:'1995-09-30', emergency_name:'Mary Byrne',      emergency_phone:'+353 87 555 0112', emergency_relation:'Mother',    start_date:'2023-06-12', ppsn_last4:'9090C', bank_name:'BOI',     bank_last4:'5544', notes:'Evening specialist. Locked Thu–Sun only — has another weekday job.' },
-      s7:  { phone:'+351 91 555 0113', address:'3 Pier Avenue, Howth',       eircode:'D13 R113', dob:'1993-04-18', emergency_name:'Inês Azinheira',  emergency_phone:'+351 91 555 0114', emergency_relation:'Cousin',    start_date:'2022-11-21', ppsn_last4:'1212B', bank_name:'Revolut', bank_last4:'8801', notes:'Hot Dog Box specialist Sat+Sun. Cannot open — alarm code not issued.' },
-      s8:  { phone:'+353 87 555 0115', address:'Flat 2, 28 Abbey St, Howth', eircode:'D13 T221', dob:'2001-08-12', emergency_name:'Priya Bodhke',    emergency_phone:'+91 98 555 0116',  emergency_relation:'Mother',    start_date:'2025-01-08', ppsn_last4:'4455D', bank_name:'AIB',     bank_last4:'6677', notes:'Stamp 1G (MSc graduate). Paired-only floor presence. Renews 2028-05-15.' },
-      s9:  { phone:'+353 89 555 0117', address:'11 Bayside Square, Sutton',  eircode:'D13 P109', dob:'2003-12-03', emergency_name:'Joe Lally',       emergency_phone:'+353 89 555 0118', emergency_relation:'Father',    start_date:'2024-04-15', ppsn_last4:'6677E', bank_name:'Revolut', bank_last4:'3322', notes:'Paired-only. Evening / afternoon shifts only. Studying part-time.' },
-      s10: { phone:'+353 86 555 0119', address:'27 Greenfields, Howth',      eircode:'D13 H770', dob:'1998-02-25', emergency_name:'Carol Doyle',     emergency_phone:'+353 86 555 0120', emergency_relation:'Mother',    start_date:'2024-08-19', ppsn_last4:'7788F', bank_name:'BOI',     bank_last4:'1100', notes:'Flexible afternoon staff. Up for any non-opening slot.' },
-      s11: { phone:'+353 87 555 0121', address:'Apt 7, Marine View, Howth',  eircode:'D13 M991', dob:'2005-05-18', emergency_name:'Ann Martin',      emergency_phone:'+353 87 555 0122', emergency_relation:'Mother',    start_date:'2026-04-22', ppsn_last4:'8899G', bank_name:'AIB',     bank_last4:'4400', notes:'New starter (Apr 2026). Paired-only — still in initial 6-week pair window.' },
-      s12: { phone:'+353 89 555 0123', address:'4 Harbour View, Howth',      eircode:'D13 J554', dob:'1994-10-08', emergency_name:'Tom Jones',       emergency_phone:'+353 89 555 0124', emergency_relation:'Brother',   start_date:'2025-11-03', ppsn_last4:'9911H', bank_name:'Revolut', bank_last4:'5500', notes:'Hot Dog Box weekend specialist. 3rd HDB hand alongside Rafael + Jonas.' },
-      s13: { phone:'+353 85 555 0125', address:'Galway (relocated)',         eircode:null,       dob:'1995-07-14', emergency_name:'Maria Santos',    emergency_phone:'+353 85 555 0126', emergency_relation:'Mother',    start_date:'2023-04-10', ppsn_last4:'2233A', bank_name:'Revolut', bank_last4:'9988', notes:'Left summer 2025 — moved to Galway. Kept on file.' },
-      s14: { phone:'+353 86 555 0127', address:'Cork (relocated)',           eircode:null,       dob:'2003-09-21', emergency_name:'Sarah Hargrove',  emergency_phone:'+353 86 555 0128', emergency_relation:'Sister',    start_date:'2024-01-29', ppsn_last4:'4455B', bank_name:'AIB',     bank_last4:'1144', notes:'Left Sep 2025 — moved to Cork for college. Kept on file.' },
+      s1:  { phone:'+353 87 555 0101', address:'Address line, Greater Dublin',    eircode:'D13 X234', dob:'1989-03-12', emergency_name:'Partner of A',  emergency_phone:'+353 87 555 0102', emergency_relation:'Partner', start_date:'2021-08-04', ppsn_last4:'1234A', bank_name:'AIB',     bank_last4:'4521', notes:'Manager since 2024 promotion. Key holder. Trained deli + cash float.' },
+      s2:  { phone:'+353 87 555 0103', address:'Address line, Greater Dublin',    eircode:'D13 Y991', dob:'1991-07-22', emergency_name:'Spouse of B',   emergency_phone:'+353 87 555 0104', emergency_relation:'Spouse',  start_date:'2022-02-14', ppsn_last4:'5821B', bank_name:'Revolut', bank_last4:'7710', notes:'Manager · Hot Dog Box lead alongside G. Trilingual.' },
+      s3:  { phone:'+353 86 555 0105', address:'Address line, Greater Dublin',    eircode:'D13 N881', dob:'1986-11-04', emergency_name:'Spouse of C',   emergency_phone:'+353 86 555 0106', emergency_relation:'Spouse',  start_date:'2020-05-18', ppsn_last4:'3344A', bank_name:'BOI',     bank_last4:'9012', notes:'Senior. Wed anchor. Reliable for opens — holds shop keys.' },
+      s4:  { phone:'+353 87 555 0107', address:'Address line, Greater Dublin',    eircode:'D13 W004', dob:'1990-01-29', emergency_name:'Sibling of D',  emergency_phone:'+353 87 555 0108', emergency_relation:'Sibling', start_date:'2021-03-09', ppsn_last4:'7766C', bank_name:'AIB',     bank_last4:'3340', notes:'Deli manager. Mornings only — no closes. Fri anchor.' },
+      s5:  { phone:'+353 85 555 0109', address:'Address line, Greater Dublin',    eircode:'D13 V552', dob:'2001-06-15', emergency_name:'Sibling of E',  emergency_phone:'+353 85 555 0110', emergency_relation:'Sibling', start_date:'2024-09-02', ppsn_last4:'8821B', bank_name:'Revolut', bank_last4:'2156', notes:'Stamp 2 student visa — 20h cap during term. Renews 2026-05-28 (urgent).' },
+      s6:  { phone:'+353 87 555 0111', address:'Address line, Greater Dublin',    eircode:'D13 K820', dob:'1995-09-30', emergency_name:'Parent of F',   emergency_phone:'+353 87 555 0112', emergency_relation:'Parent',  start_date:'2023-06-12', ppsn_last4:'9090C', bank_name:'BOI',     bank_last4:'5544', notes:'Evening specialist. Locked Thu–Sun only — has another weekday job.' },
+      s7:  { phone:'+351 91 555 0113', address:'Address line, Greater Dublin',    eircode:'D13 R113', dob:'1993-04-18', emergency_name:'Family of G',   emergency_phone:'+351 91 555 0114', emergency_relation:'Cousin',  start_date:'2022-11-21', ppsn_last4:'1212B', bank_name:'Revolut', bank_last4:'8801', notes:'Hot Dog Box specialist Sat+Sun. Cannot open — alarm code not issued.' },
+      s8:  { phone:'+353 87 555 0115', address:'Address line, Greater Dublin',    eircode:'D13 T221', dob:'2001-08-12', emergency_name:'Parent of H',   emergency_phone:'+91 98 555 0116',  emergency_relation:'Parent',  start_date:'2025-01-08', ppsn_last4:'4455D', bank_name:'AIB',     bank_last4:'6677', notes:'Stamp 1G (MSc graduate). Paired-only floor presence. Renews 2028-05-15.' },
+      s9:  { phone:'+353 89 555 0117', address:'Address line, Greater Dublin',    eircode:'D13 P109', dob:'2003-12-03', emergency_name:'Parent of I',   emergency_phone:'+353 89 555 0118', emergency_relation:'Parent',  start_date:'2024-04-15', ppsn_last4:'6677E', bank_name:'Revolut', bank_last4:'3322', notes:'Paired-only. Evening / afternoon shifts only. Studying part-time.' },
+      s10: { phone:'+353 86 555 0119', address:'Address line, Greater Dublin',    eircode:'D13 H770', dob:'1998-02-25', emergency_name:'Parent of J',   emergency_phone:'+353 86 555 0120', emergency_relation:'Parent',  start_date:'2024-08-19', ppsn_last4:'7788F', bank_name:'BOI',     bank_last4:'1100', notes:'Flexible afternoon staff. Up for any non-opening slot.' },
+      s11: { phone:'+353 87 555 0121', address:'Address line, Greater Dublin',    eircode:'D13 M991', dob:'2005-05-18', emergency_name:'Parent of K',   emergency_phone:'+353 87 555 0122', emergency_relation:'Parent',  start_date:'2026-04-22', ppsn_last4:'8899G', bank_name:'AIB',     bank_last4:'4400', notes:'New starter (Apr 2026). Paired-only — still in initial 6-week pair window.' },
+      s12: { phone:'+353 89 555 0123', address:'Address line, Greater Dublin',    eircode:'D13 J554', dob:'1994-10-08', emergency_name:'Sibling of L',  emergency_phone:'+353 89 555 0124', emergency_relation:'Sibling', start_date:'2025-11-03', ppsn_last4:'9911H', bank_name:'Revolut', bank_last4:'5500', notes:'Hot Dog Box weekend specialist. 3rd HDB hand alongside G + B.' },
+      s13: { phone:'+353 85 555 0125', address:'Relocated outside Dublin',        eircode:null,       dob:'1995-07-14', emergency_name:'Parent of M',   emergency_phone:'+353 85 555 0126', emergency_relation:'Parent',  start_date:'2023-04-10', ppsn_last4:'2233A', bank_name:'Revolut', bank_last4:'9988', notes:'Left summer 2025 — relocated. Kept on file.' },
+      s14: { phone:'+353 86 555 0127', address:'Relocated outside Dublin',        eircode:null,       dob:'2003-09-21', emergency_name:'Sibling of N',  emergency_phone:'+353 86 555 0128', emergency_relation:'Sibling', start_date:'2024-01-29', ppsn_last4:'4455B', bank_name:'AIB',     bank_last4:'1144', notes:'Left Sep 2025 — relocated for college. Kept on file.' },
     };
     // Merge details into each STAFF row so callers can read s.phone, s.address, etc.
     STAFF.forEach(s => { const d = STAFF_DETAILS[s.id]; if (d) Object.assign(s, d); });
@@ -1499,7 +1521,7 @@
           ((b.role === 'manager' ? 1 : 0) - (a.role === 'manager' ? 1 : 0));
 
         // ─── STEP 1: Anchor days ───────────────────────────────────────────
-        // Joan Wed → fullday (she closes). Helena Fri → morning (she doesn't close).
+        // Staff C Wed → fullday (closer). Staff D Fri → morning (no close).
         ROSTER_STAFF.forEach(s => {
           if (!s.anchor_day) return;
           const dayIdx = DAY_LABELS.indexOf(s.anchor_day);
@@ -1509,7 +1531,7 @@
         });
 
         // ─── STEP 2: Market specialists Sat + Sun ──────────────────────────
-        // Prefer Rafael (HDB specialist), then Jonny, then Jonas as backup.
+        // Prefer Staff G (HDB specialist), then Staff L, then Staff B as backup.
         [5, 6].forEach(dayIdx => {
           if (!ADJUSTED_NEEDS[dayIdx].market) return;
           const preferred = ['s7', 's12', 's2'];
@@ -1585,7 +1607,7 @@
           target.insertBefore(header, target.firstChild);
         }
         const today = new Intl.DateTimeFormat('en-IE', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).format(new Date());
-        header.innerHTML = `<h1>🍦 The Gem · ${title}</h1><div class="meta">Howth Harbour · Printed ${today}</div>`;
+        header.innerHTML = `<h1>📋 The Roster Company · ${title}</h1><div class="meta">Trial client · Printed ${today}</div>`;
         // Mark this page as the print target so print CSS hides others.
         document.querySelectorAll('.page').forEach(p => p.classList.remove('print-target'));
         target.classList.add('print-target');
@@ -1975,6 +1997,128 @@
     window.printPayroll = printPayroll;
     window.renderPayroll = renderPayroll;
 
+    /* ─── BRIGHTPAY EXPORT ────────────────────────────────────────────────
+       Real BrightPay-compatible "Pay Period Hours" CSV. BrightPay calculates
+       PAYE / PRSI Class A1 / USC internally from live Revenue tax tables,
+       so we just supply: employee ID, period dates, hours (standard + Sunday),
+       rate, and notes for flags (RTW expiring, Stamp 2 cap, etc.).
+
+       Period: this week (Mon-Sun containing today).
+       Filename: brightpay_payrun_YYYY-MM-DD.csv (period end date).
+       Import in BrightPay: File → Import → Pay Period Hours from CSV. */
+    function periodForThisWeek() {
+      const today = new Date();
+      const dow = (today.getDay() + 6) % 7; // Mon=0..Sun=6
+      const monday = new Date(today); monday.setDate(today.getDate() - dow);
+      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+      const iso = d => d.toISOString().slice(0, 10);
+      return { start: iso(monday), end: iso(sunday) };
+    }
+    function buildBrightPayRows() {
+      const period = periodForThisWeek();
+      const rows = ACTIVE_STAFF.map((s, i) => {
+        const p = computePayslip(s);
+        const empNumber = String(i + 1).padStart(3, '0');
+        const [first, ...rest] = s.name.split(' ');
+        const surname = rest.join(' ');
+        const notes = [];
+        if (s.rtw_type === 'Stamp 2') notes.push(`Stamp 2 ${IRISH_LAWS.stamp2_term_cap_hours}h termtime cap`);
+        if (s.rtw_expiry) {
+          const days = Math.ceil((new Date(s.rtw_expiry) - new Date()) / 86400000);
+          if (days <= 30) notes.push(`RTW expires ${s.rtw_expiry} (${days}d)`);
+        }
+        if (s.tier === 'T1') notes.push('Junior — paired-only floor');
+        return {
+          empNumber,
+          firstName: first,
+          surname,
+          ppsn: s.ppsn_last4 ? `*****${s.ppsn_last4}` : '',
+          periodStart: period.start,
+          periodEnd: period.end,
+          standardHours: (p.paidHours - p.sundayPaidHours).toFixed(2),
+          sundayHours:   p.sundayPaidHours.toFixed(2),
+          hourlyRate:    Number(s.hourly_rate).toFixed(2),
+          sundayPremiumPct: IRISH_LAWS.sunday_premium_pct,
+          grossPay:      p.gross.toFixed(2),
+          notes:         notes.join(' · '),
+        };
+      });
+      return { period, rows };
+    }
+    function buildBrightPayCsv() {
+      const { period, rows } = buildBrightPayRows();
+      const header = [
+        'EmployeeNumber','FirstName','Surname','PPSN',
+        'PeriodStart','PeriodEnd',
+        'StandardHours','SundayHours','HourlyRate','SundayPremiumPct',
+        'GrossPay','Notes',
+      ];
+      const lines = [
+        `# BrightPay Pay Period Hours import · ${period.start} → ${period.end} · ${rows.length} employees`,
+        `# Generated by The Roster Company · ${new Date().toISOString()}`,
+        header.join(','),
+        ...rows.map(r => header.map(h => {
+          const key = h.charAt(0).toLowerCase() + h.slice(1);
+          const v = r[key] ?? '';
+          return `"${String(v).replace(/"/g, '""')}"`;
+        }).join(',')),
+      ];
+      return { csv: lines.join('\n'), period, count: rows.length };
+    }
+    function openBrightPayModal() {
+      try {
+        const { csv, period, count } = buildBrightPayCsv();
+        const rows = buildBrightPayRows().rows;
+        const grossTotal = rows.reduce((s, r) => s + parseFloat(r.grossPay), 0);
+        const hoursTotal = rows.reduce((s, r) => s + parseFloat(r.standardHours) + parseFloat(r.sundayHours), 0);
+        const sundayTotal = rows.reduce((s, r) => s + parseFloat(r.sundayHours), 0);
+        const flagged = rows.filter(r => r.notes.length > 0).length;
+        // Summary chips
+        const summary = document.getElementById('brightpay-summary');
+        const chip = (label, value, color) =>
+          `<div style="flex:1; min-width:140px; padding:10px 12px; background:var(--bg-elevated); border-radius:8px; border-left:3px solid ${color};">
+            <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; font-weight:800;">${label}</div>
+            <div style="font-family:ui-monospace,monospace; font-variant-numeric:tabular-nums; font-size:18px; font-weight:800; color:${color}; margin-top:2px;">${value}</div>
+          </div>`;
+        summary.innerHTML =
+          chip('Pay period', `${period.start} → ${period.end}`, '#5BA9B0') +
+          chip('Employees',  `${count}`,                       '#8B7FBA') +
+          chip('Total hours',`${hoursTotal.toFixed(1)}h`,      '#14B8A6') +
+          chip('Sunday hrs', `${sundayTotal.toFixed(1)}h`,     '#D14B7F') +
+          chip('Gross total',`€${grossTotal.toFixed(2)}`,      '#3FB984') +
+          chip('Flagged',    `${flagged} ⚠`,                   flagged ? '#E69539' : '#3FB984');
+        // Preview
+        document.getElementById('brightpay-preview').textContent = csv;
+        // Wire download button (rebind so latest CSV is captured)
+        const dl = document.getElementById('brightpay-download');
+        dl.onclick = () => {
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `brightpay_payrun_${period.end}.csv`;
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url);
+          toast(`BrightPay CSV downloaded · ${count} employees · €${grossTotal.toFixed(2)} gross`);
+          closeBrightPayModal();
+        };
+        document.getElementById('brightpay-modal').classList.add('show');
+      } catch (err) {
+        console.error('openBrightPayModal failed:', err);
+        toast('Could not build BrightPay file — check console');
+      }
+    }
+    function closeBrightPayModal() {
+      document.getElementById('brightpay-modal').classList.remove('show');
+    }
+    document.getElementById('brightpay-close').addEventListener('click', closeBrightPayModal);
+    document.getElementById('brightpay-cancel').addEventListener('click', closeBrightPayModal);
+    document.getElementById('brightpay-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'brightpay-modal') closeBrightPayModal();
+    });
+    window.openBrightPayModal = openBrightPayModal;
+    window.closeBrightPayModal = closeBrightPayModal;
+
     /* ─── COMPLIANCE CARD (Dashboard) ───────────────────────────────────────
        Lives on the Dashboard. Walks every active staff member and flags any
        breach of Irish working-time / minimum-wage / RTW law. */
@@ -2034,7 +2178,7 @@
           { icon:'🇮🇪', label:'Sunday +33% premium',  law:'OWTA §14',     ok:true,  detail:'Applied in Payslip + Payroll' },
           { icon:'🏖️', label:'4 wks annual leave (8% accrual)', law:'OWTA §19', ok:true, detail:'Tracked per staff in Detail view' },
           { icon:'💶', label:'Min wage by age band',  law:'NMW Act 2000', ok: !issues.find(i => i.kind === 'min_wage'), detail:`€${IRISH_LAWS.min_wage_full.toFixed(2)} full · age-band adjusted` },
-          { icon:'🎓', label:'Stamp 2 20h term cap',  law:'Empl. Permits Act',  ok: !issues.find(i => i.kind === 'stamp2_cap'), detail:'Ruthy (Stamp 2): auto-gen respects 20h cap' },
+          { icon:'🎓', label:'Stamp 2 20h term cap',  law:'Empl. Permits Act',  ok: !issues.find(i => i.kind === 'stamp2_cap'), detail:'Staff E (Stamp 2): auto-gen respects 20h cap' },
           { icon:'🪪', label:'RTW expiry tracking',   law:'Empl. Permits Act',  ok: !issues.find(i => i.kind === 'rtw_expired'), detail: issues.find(i => i.kind === 'rtw_soon') ? '⚠ One staff RTW expiring within 30 days' : 'No expiries imminent' },
         ];
         const passing = rules.filter(r => r.ok).length;
@@ -2156,11 +2300,11 @@
       ACTIVE_STAFF.forEach((s, i) => {
         seed[s.id] = [0,0,0,0,0,0,0];
         // Drop in a few preferences so the grid isn't all-green
-        if (s.id === 's6') { seed[s.id] = [3,3,3,2,2,2,2]; }   // Gavin Thu-Sun only
-        if (s.id === 's7') { seed[s.id] = [0,0,0,0,0,1,1]; }   // Rafael weekend market mornings
-        if (s.id === 's8') { seed[s.id] = [2,3,2,2,2,2,3]; }   // Rushikesh PM-leaning
-        if (s.id === 's11') { seed[s.id] = [0,2,3,2,2,2,2]; }  // Sean evening filler
-        if (s.id === 's4') { seed[s.id] = [1,1,1,1,1,1,3]; }   // Helena mornings, Sun off
+        if (s.id === 's6') { seed[s.id] = [3,3,3,2,2,2,2]; }   // Staff F Thu-Sun only
+        if (s.id === 's7') { seed[s.id] = [0,0,0,0,0,1,1]; }   // Staff G weekend market mornings
+        if (s.id === 's8') { seed[s.id] = [2,3,2,2,2,2,3]; }   // Staff H PM-leaning
+        if (s.id === 's11') { seed[s.id] = [0,2,3,2,2,2,2]; }  // Staff K evening filler
+        if (s.id === 's4') { seed[s.id] = [1,1,1,1,1,1,3]; }   // Staff D mornings, Sun off
       });
       return seed;
     })();
@@ -2314,7 +2458,7 @@
     function claimSwap(id) {
       const sw = swapsData.marketplace.find(x => x.id === id);
       if (!sw) return;
-      // Demo: current signed-in user is Adrienne (s1). Claims attribute to her.
+      // Demo: current signed-in user is Staff A (s1). Claims attribute to them.
       sw.status = 'claimed';
       sw.claimerId = 's1';
       saveSwaps();

@@ -1,30 +1,32 @@
-# The Gem Roster
+# The Roster Company
 
-Rostering, payroll and compliance for an 11-person ice cream shop in Howth.
+Rostering, payroll and compliance for small Irish retail. Trial demo for a single-site, ~12-person shop in the Dublin area.
 
 Live demo: https://rushikeshbodkhe01.github.io/the-gem-roster/
 
 ## Background
 
-I work weekends at The Gem in Howth. The owner rosters 11 staff every Sunday using paper and WhatsApp. I built this to replace that.
+I work weekends at a single-site retail business. The owner rosters ~12 staff every Sunday using paper and WhatsApp. I built this to replace that.
 
-It also handles three things Bizimply and similar tools don't do well for a small Irish retail business:
+It handles three things Bizimply and similar tools don't do well for a small Irish retail business:
 
 - Right-to-work expiry tracking (Stamp 2, Working Holiday, Stamp 1G)
-- Demand forecast that actually uses weather (Howth lives and dies by sunshine)
+- Demand forecast that uses live weather (a coastal business lives and dies by sunshine)
 - Payroll output that drops straight into BrightPay with correct PRSI and USC bands
+
+All staff in the demo are anonymised as Staff A through Staff N.
 
 ## What's in it
 
-Auto-generated weekly roster, weighted by the 7-day Open-Meteo forecast and the Howth event calendar. Click any cell to edit a shift.
+Auto-generated weekly roster, weighted by the 7-day Open-Meteo forecast. Click any cell to edit a shift.
 
-Right-to-work tracker per staff member with a 30-day expiry warning. This is the feature I'm proudest of because nobody in the team had to remember anything.
+Right-to-work tracker per staff member with a 30-day expiry warning.
 
-Compliance checker that runs against the Organisation of Working Time Act 1997 after every change. Flags breaches of the 48-hour week, 11-hour daily rest, and Sunday premium rules.
+Compliance checker that runs against the Organisation of Working Time Act 1997, the National Minimum Wage Act 2000, and the Employment Permits Acts after every change. Flags breaches of the 48-hour week, 11-hour daily rest, age-band minimum wage, and Stamp 2 20-hour term-time cap.
 
 Payslip generator with PAYE, PRSI Class A1, USC bands, and the 23% employer uplift. Exports a BrightPay-ready CSV.
 
-Shift swap marketplace, availability heatmap, audit log, leave approvals.
+Shift swap marketplace, availability heatmap, weekly payroll summary, leave approvals.
 
 ## Stack
 
@@ -44,7 +46,7 @@ I haven't pitched this to the owner yet. That's the next conversation.
 
 ## What's next
 
-SMS shift notifications, multi-store support if a second site opens, and eventually pushing PRSI returns straight to Revenue's ROS API. The plan is to keep building it for The Gem first, then offer it to one or two other Dublin SMEs.
+SMS shift notifications, multi-store support if a second site opens, and eventually pushing PRSI returns straight to Revenue's ROS API. The plan is to keep building it for the trial client first, then offer it to one or two other Dublin SMEs.
 
 ## Why this exists
 

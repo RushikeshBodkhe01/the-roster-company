@@ -2674,7 +2674,7 @@
 
           ${sectionHeading('Personal')}
           ${detailRow('📞', 'Phone',          s.phone)}
-          ${detailRow('✉️', 'Email',          s.email)}
+          ${detailRow('✉️', 'Email',          s.email || (s.id + '@rosterco.demo'))}
           ${detailRow('🏠', 'Address',        (s.address || '—') + (s.eircode ? ' · <span style="font-family:ui-monospace,monospace;">' + s.eircode + '</span>' : ''))}
           ${detailRow('🎂', 'Date of birth',  s.dob ? `${fmtDate(s.dob)} <span style="color:var(--text-muted); font-weight:400; margin-left:6px;">(${ageFromDob(s.dob)})</span>` : null)}
           ${detailRow('🆔', 'PPSN',           s.ppsn_last4 ? `<span style="font-family:ui-monospace,monospace;">●●●●●● ${s.ppsn_last4}</span>` : null)}
@@ -2742,7 +2742,7 @@
         return `<tr style="cursor:pointer;" onclick="openStaffDetail('${s.id}')">
           <td><div style="display:flex; align-items:center; gap:10px;">
             <span class="avatar avatar-sm" style="background:${bg};">${s.init}</span>
-            <div><div style="font-weight:700;">${s.name}</div><div style="font-size:11px; color:var(--text-muted);">${s.email || (s.id + '@thegem.ie')}</div></div>
+            <div><div style="font-weight:700;">${s.name}</div><div style="font-size:11px; color:var(--text-muted);">${s.email || (s.id + '@rosterco.demo')}</div></div>
           </div></td>
           <td>${s.pos}</td>
           <td><span class="pill ${s.mgr ? 'pill-mgr' : 'pill-staff'}">${s.mgr ? 'manager' : 'staff'}</span> <span class="pill" style="margin-left:4px; background:${t.bg}; color:${t.fg};">${s.tier}</span></td>

@@ -675,14 +675,14 @@
       <!-- Demoted to an optional autofill helper below the actual inputs. -->
       <div class="modal-section-label" style="margin-top:18px; font-size:12px;">Quick presets (click to fill)</div>
       <div class="preset-row" id="preset-row">
-        <button type="button" class="preset-btn" data-start="06:30" data-end="14:00">
-          <span class="preset-time">06:30 – 14:00</span><span class="preset-label">Morning</span>
+        <button type="button" class="preset-btn" data-start="07:00" data-end="15:00">
+          <span class="preset-time">07:00 – 15:00</span><span class="preset-label">Morning</span>
         </button>
-        <button type="button" class="preset-btn" data-start="08:00" data-end="17:00">
-          <span class="preset-time">08:00 – 17:00</span><span class="preset-label">Full day</span>
+        <button type="button" class="preset-btn" data-start="09:00" data-end="18:00">
+          <span class="preset-time">09:00 – 18:00</span><span class="preset-label">Full day</span>
         </button>
-        <button type="button" class="preset-btn" data-start="14:00" data-end="21:00">
-          <span class="preset-time">14:00 – 21:00</span><span class="preset-label">Evening</span>
+        <button type="button" class="preset-btn" data-start="15:00" data-end="22:00">
+          <span class="preset-time">15:00 – 22:00</span><span class="preset-label">Evening</span>
         </button>
       </div>
 
@@ -1047,7 +1047,7 @@
       staffRow({ id:'s1',  name:'Staff A', init:'A', role:'manager', pos:'Manager',           tier:'T3', weekly_hours_ceiling:39, hourly_rate:16.50, can_open:true,  can_close:true,  can_deli:true                                                                       }),
       staffRow({ id:'s2',  name:'Staff B', init:'B', role:'manager', pos:'Manager',           tier:'T3', weekly_hours_ceiling:39, hourly_rate:16.50, can_open:true,  can_close:true,  can_deli:true,  can_market:true                                                       }),
       staffRow({ id:'s3',  name:'Staff C', init:'C',                 pos:'Senior Staff',      tier:'T3',                                            can_open:true,  can_close:true,  can_deli:true,                  anchor_day:'Wed'                                       }),
-      // Staff D: mornings only — real rotas show all shifts end by 14:00. Confirmed deli_manager + Fri anchor.
+      // Staff D: mornings only — all shifts end by 15:00 (handover). Confirmed deli_manager + Fri anchor.
       staffRow({ id:'s4',  name:'Staff D', init:'D',                 pos:'Senior Staff',      tier:'T3',                                            can_open:true,  can_close:false, can_deli:true,                  anchor_day:'Fri', special_role:'deli_manager'           }),
       staffRow({ id:'s5',  name:'Staff E', init:'E',                 pos:'Staff',             tier:'T2',                                            can_open:true,  can_close:true,  can_deli:true,                                    rtw_type:'Stamp 2',   rtw_expiry:'2026-05-28' }),
       staffRow({ id:'s6',  name:'Staff F', init:'F',                 pos:'Staff (Eves)',      tier:'T2',                                                            can_close:true,                                  max_shifts_per_week:5, fixed_days:['Thu','Fri','Sat','Sun'] }),
@@ -1111,10 +1111,10 @@
     /* ─── TODAY'S SHIFTS ─── */
     (function () {
       const shifts = [
-        { staff: STAFF[0], type:'AM',  time:'06:30–14:00', clocked:true,  color:'#2563EB', label:'🌅 AM' },
-        { staff: STAFF[3], type:'DEL', time:'07:00–15:00', clocked:true,  color:'#7C3AED', label:'🥪 DELI' },
-        { staff: STAFF[6], type:'BC',  time:'08:00–17:00', clocked:false, color:'#BE185D', label:'🔄 BC' },
-        { staff: STAFF[1], type:'PM',  time:'14:00–21:00', clocked:false, color:'#0F766E', label:'🌆 PM' },
+        { staff: STAFF[0], type:'AM',  time:'07:00–15:00', clocked:true,  color:'#2563EB', label:'🌅 AM' },
+        { staff: STAFF[3], type:'DEL', time:'08:00–15:00', clocked:true,  color:'#7C3AED', label:'🥪 DELI' },
+        { staff: STAFF[6], type:'BC',  time:'09:00–18:00', clocked:false, color:'#BE185D', label:'🔄 BC' },
+        { staff: STAFF[1], type:'PM',  time:'15:00–22:00', clocked:false, color:'#0F766E', label:'🌆 PM' },
       ];
       document.getElementById('todays-shifts').innerHTML = shifts.map(s => {
         const bg = s.staff.mgr ? '#D14B7F' : colorFor(s.staff.id);
@@ -1151,8 +1151,8 @@
         if (stored) { Object.assign(rosterData, JSON.parse(stored)); return; }
       } catch(e) {}
       const typeToTimes = {
-        AM:{start:'06:30',end:'14:00'}, DEL:{start:'07:00',end:'15:00'},
-        BC:{start:'08:00',end:'17:00'}, PM:{start:'14:00',end:'21:00'}, OFF:null,
+        AM:{start:'07:00',end:'15:00'}, DEL:{start:'08:00',end:'15:00'},
+        BC:{start:'09:00',end:'18:00'}, PM:{start:'15:00',end:'22:00'}, OFF:null,
       };
       const seq = ['AM','AM','PM','OFF','BC','DEL','PM'];
       ROSTER_STAFF.forEach((s, idx) => {
@@ -1285,9 +1285,9 @@
     function zoneFor(shift) {
       if (!shift) return null;
       const startHour = parseInt(shift.start.slice(0, 2), 10);
-      if (startHour < 12) return SHIFT_ZONES.morning;
-      if (startHour < 16) return SHIFT_ZONES.afternoon;
-      return SHIFT_ZONES.evening;
+      if (startHour < 12) return SHIFT_ZONES.morning;    // 07:00 / 09:00 openers + fullday
+      if (startHour < 15) return SHIFT_ZONES.afternoon;  // 12:00 market
+      return SHIFT_ZONES.evening;                        // 15:00 closer (ends 22:00)
     }
     function cellTintForShift(shift) {
       const z = zoneFor(shift);
@@ -1375,10 +1375,10 @@
 
     /* ─── AUTO-GENERATE ROSTER ─── */
     const SLOTS = {
-      morning:   { start:'06:30', end:'14:00', hours:7.5 }, // opener
-      fullday:   { start:'08:00', end:'17:00', hours:9   }, // bridge / mid
-      afternoon: { start:'14:00', end:'21:00', hours:7   }, // closer
-      market:    { start:'11:00', end:'19:00', hours:8   }, // Hot Dog Box / market (Sat/Sun)
+      morning:   { start:'07:00', end:'15:00', hours:8   }, // opener — opens at 7, hands over at 3
+      fullday:   { start:'09:00', end:'18:00', hours:9   }, // bridge / mid
+      afternoon: { start:'15:00', end:'22:00', hours:7   }, // closer — closes at 10
+      market:    { start:'12:00', end:'20:00', hours:8   }, // Hot Dog Box / market (Sat/Sun)
     };
 
     // Real per-day floor coverage from observed Bizimply rotas:
@@ -2368,14 +2368,14 @@
     function defaultSwapsData() {
       return {
         marketplace: [
-          { id:'sw1', releaserId:'s6', day:'Sat', time:'14:00–21:00', reason:'Sister’s engagement party', status:'open', claimerId:null },
+          { id:'sw1', releaserId:'s6', day:'Sat', time:'15:00–22:00', reason:'Sister’s engagement party', status:'open', claimerId:null },
           { id:'sw2', releaserId:'s8', day:'Wed', time:'16:00–20:00', reason:'College deadline',          status:'open', claimerId:null },
-          { id:'sw3', releaserId:'s5', day:'Thu', time:'06:30–14:00', reason:'Doctor appointment',         status:'open', claimerId:null },
+          { id:'sw3', releaserId:'s5', day:'Thu', time:'07:00–15:00', reason:'Doctor appointment',         status:'open', claimerId:null },
           { id:'sw4', releaserId:'s7', day:'Sun', time:'11:00–19:00 HDB', reason:'Family wedding',         status:'claimed', claimerId:'s12' },
         ],
         peer: [
-          { id:'pw1', fromId:'s9', fromShift:'Sun 14:00–21:00', toId:'s11', toShift:'Wed 15:00–20:00', status:'pending' },
-          { id:'pw2', fromId:'s10', fromShift:'Fri 14:00–21:00', toId:'s3', toShift:'Tue 06:30–14:00', status:'pending' },
+          { id:'pw1', fromId:'s9', fromShift:'Sun 15:00–22:00', toId:'s11', toShift:'Wed 16:00–21:00', status:'pending' },
+          { id:'pw2', fromId:'s10', fromShift:'Fri 15:00–22:00', toId:'s3', toShift:'Tue 07:00–15:00', status:'pending' },
         ],
       };
     }

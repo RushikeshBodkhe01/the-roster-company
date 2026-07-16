@@ -2,7 +2,7 @@
 
 Rostering, payroll and compliance for small Irish retail. Trial demo for a single-site, ~12-person shop in the Dublin area.
 
-Live demo: https://rushikeshbodkhe01.github.io/the-gem-roster/
+Live demo: https://rushikeshbodkhe01.github.io/the-roster-company/
 
 ## Background
 
